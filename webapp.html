@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Number Guessing Game — Vaporwave Neon</title>
+
+<style>
+  /* -----------------------
+     Vaporwave Neon Theme - Option B (Full Dark Neon)
+     All styles contained here
+     ----------------------- */
+  :root{
+    --bg1: #0b0014;   /* very dark purple */
+    --bg2: #2b003d;   /* dark magenta */
+    --neon-pink: #ff2fa8;
+    --neon-cyan: #7ef9ff;
+    --neon-purple: #a56eff;
+    --card-dark: rgba(10,6,20,0.6);
+    --muted: #a0a6c1;
+    --glass: rgba(255,255,255,0.04);
+  }
+
+  html,body { height:100%; margin:0; font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial; background: linear-gradient(160deg, var(--bg1), var(--bg2)); color:#e9eaf6; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+
+  /* Simple non-bootstrap nav - centered */
+  .simple-nav {
+    display:flex;
+    justify-content:center;
+    gap:22px;
+    padding:14px;
+    background: linear-gradient(90deg, rgba(255,47,168,0.06), rgba(126,249,255,0.02));
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    box-shadow: 0 6px 30px rgba(0,0,0,0.45);
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+  .simple-nav a {
+    color: var(--neon-cyan);
+    text-decoration: none;
+    font-weight:700;
+    letter-spacing:0.6px;
+    padding:6px 8px;
+    transition: all 0.18s ease;
+    text-shadow: 0 0 12px rgba(126,249,255,0.05);
+  }
+  .simple-nav a:hover { color: var(--neon-pink); transform: translateY(-2px); text-shadow: 0 0 18px rgba(255,47,168,0.4); }
+  .simple-nav a.active { text-decoration: underline; color: var(--neon-pink); }
+
+  /* Page wrap */
+  .wrap { max-width:1100px; margin:28px auto; padding: 8px; }
+
+  .title { text-align:center; margin-bottom:10px; }
+  .title h1 { margin:0; font-size:1.9rem; color: #fff; text-shadow: 0 6px 40px rgba(165,110,255,0.18); }
+  .subtitle { color:var(--muted); margin-top:6px; }
+
+  /* Layout grid */
+  .game-grid { display:grid; grid-template-columns: 1fr 360px; gap:18px; align-items:start; }
+  @media (max-width:900px) { .game-grid { grid-template-columns: 1fr; } }
+
+  /* Cards */
+  .card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius:14px;
+    padding:16px;
+    box-shadow: 0 10px 40px rgba(2,2,8,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+    backdrop-filter: blur(6px);
+  }
+
+  /* Neon outline */
+  .neon-outline {
+    box-shadow: 0 6px 24px rgba(165,110,255,0.06), 0 0 24px rgba(126,249,255,0.02);
+    border: 1px solid rgba(154,63,255,0.08);
+  }
+
+  /* Game panel styles */
+  .game-panel { padding:14px; border-radius:12px; }
+  label { display:block; font-weight:700; color:var(--neon-cyan); margin-top:10px; font-size:0.95rem; text-shadow: 0 2px 6px rgba(126,249,255,0.03); }
+  input[type="text"], input[type="number"] {
+    width:100%;
+    padding:10px 12px;
+    margin-top:8px;
+    border-radius:10px;
+    border: 1px solid rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.02);
+    color: #fff;
+    outline:none;
+    box-shadow: 0 6px 20px rgba(126,249,255,0.02) inset;
+    transition: box-shadow .15s ease, transform .08s ease;
+    font-size:16px;
+  }
+  input:focus { box-shadow: 0 0 24px rgba(126,249,255,0.12); transform: translateY(-1px); }
+
+  .controls { margin-top:12px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+
+  .btn {
+    background: linear-gradient(90deg, var(--neon-pink), var(--neon-purple));
+    color: #081426;
+    border: none;
+    padding:10px 14px;
+    border-radius:10px;
+    font-weight:800;
+    cursor:pointer;
+    box-shadow: 0 8px 40px rgba(165,110,255,0.14), 0 0 18px rgba(255,47,168,0.08);
+    transition: transform .08s ease, box-shadow .12s ease;
+  }
+  .btn:hover { transform: translateY(-3px); box-shadow: 0 18px 60px rgba(165,110,255,0.22), 0 0 40px rgba(255,47,168,0.22); }
+  .btn.secondary {
+    background: linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+    color: var(--neon-cyan);
+    border: 1px solid rgba(126,249,255,0.08);
+    box-shadow: none;
+  }
+
+  /* Hint area */
+  .hint {
+    margin-top:14px;
+    display:flex;
+    gap:12px;
+    align-items:center;
+    min-height:56px;
+    padding:8px 12px;
+    border-radius:10px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));
+    border: 1px solid rgba(255,255,255,0.02);
+  }
+  .hint-emoji { font-size:1.45rem; text-shadow: 0 6px 28px rgba(126,249,255,0.06); }
+  .hint-text { font-weight:800; color:#fff; font-size:1rem; }
+
+  .hint .direction { color: var(--neon-pink); font-weight:900; margin-right:6px; }
+  .hint .proximity { color: var(--neon-cyan); }
+
+  /* Badges */
+  .status-row { display:flex; gap:10px; margin-top:12px; flex-wrap:wrap; align-items:center; }
+  .badge {
+    padding:8px 10px;
+    border-radius:10px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border:1px solid rgba(126,249,255,0.04);
+    color:var(--neon-cyan);
+    font-weight:800;
+  }
+
+  /* Guess history */
+  .guess-history { margin-top:12px; color: var(--muted); }
+  .guess-history .chip {
+    display:inline-block; margin-right:8px; padding:6px 8px; border-radius:8px; background: rgba(255,255,255,0.02); color:#fff;
+    border:1px solid rgba(255,255,255,0.03);
+  }
+
+  /* Leaderboard */
+  .leaderboard h3 { margin-top:0; color: var(--neon-cyan); text-shadow: 0 2px 12px rgba(126,249,255,0.04); }
+  .lb-list { list-style:none; padding:0; margin:0; max-height:480px; overflow:auto; }
+  .lb-item { display:flex; justify-content:space-between; gap:8px; padding:10px; align-items:center; border-bottom:1px dashed rgba(255,255,255,0.02); }
+  .lb-item .name { font-weight:900; color:#fff; }
+  .lb-item .meta { color:var(--muted); font-size:0.9rem; }
+
+  .top-badge { background: linear-gradient(90deg,#ffd26b,#ff9b42); padding:6px 10px; border-radius:8px; color:#381a00; font-weight:800; }
+
+  /* Confetti canvas */
+  #confetti { position: fixed; inset:0; pointer-events:none; z-index:9999; }
+
+  /* small helper */
+  .muted { color:var(--muted); font-size:0.95rem; }
+
+</style>
+</head>
+
+<body>
+  <!-- NAV -->
+  <nav class="simple-nav" aria-label="Main navigation">
+    <a href="index.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="resume.html">Resume</a>
+    <a href="scratch.html">Scratch Page</a>
+    <a href="webapp.html" class="active">Game</a>
+  </nav>
+
+  <div class="wrap">
+
+    <div class="title">
+      <h1>Number Guessing — Vaporwave Arena</h1>
+      <div class="subtitle">Enter your name, guess numbers, and climb the leaderboard</div>
+    </div>
+
+    <div class="game-grid">
+
+      <!-- LEFT: Game -->
+      <section class="card neon-outline game-panel" aria-labelledby="game-heading">
+        <h2 id="game-heading" style="margin:0 0 6px 0; color:var(--neon-pink);">Play</h2>
+
+        <label for="playerName">Player name (required)</label>
+        <input id="playerName" type="text" placeholder="e.g., Alex" autocomplete="name" aria-label="Player name">
+
+        <label for="guessInput">Guess a number (1–100)</label>
+        <input id="guessInput" type="number" min="1" max="100" placeholder="Enter a number" disabled aria-label="Guess input">
+
+        <div class="controls">
+          <button id="guessBtn" class="btn" onclick="makeGuess()" disabled aria-label="Submit guess">Guess</button>
+          <button id="playAgainBtn" class="btn secondary" onclick="resetRound()" aria-label="Play again">Play Again</button>
+          <button class="btn secondary" onclick="clearInput()" aria-label="Clear input">Clear</button>
+        </div>
+
+        <div class="hint" role="status" aria-live="polite">
+          <div id="hintEmoji" class="hint-emoji">🧭</div>
+          <div id="hintText" class="hint-text"><span class="direction">—</span> <span class="proximity muted">Enter your name to begin</span></div>
+        </div>
+
+        <div class="status-row">
+          <div class="badge" id="guessCount">Guesses: 0</div>
+          <div class="badge muted" id="rangeBadge">Range: 1–100</div>
+          <div class="badge muted" id="trendBadge">Trend: —</div>
+        </div>
+
+        <div class="guess-history" id="historyArea" aria-live="polite" style="margin-top:12px;">
+          Previous guesses: <span id="historyList" class="muted">—</span>
+        </div>
+
+        <p class="muted" style="margin-top:14px;">Tip: enter your name first. The leaderboard saves every finished attempt locally.</p>
+      </section>
+
+      <!-- RIGHT: Leaderboard -->
+      <aside class="card leaderboard" aria-labelledby="lb-heading">
+        <h3 id="lb-heading">Leaderboard</h3>
+
+        <div style="display:flex; gap:8px; align-items:center; margin-bottom:10px;">
+          <div class="muted">All saved attempts (local)</div>
+          <button class="btn secondary" style="margin-left:auto;" onclick="clearLeaderboard()">Clear</button>
+        </div>
+
+        <ol id="leaderList" class="lb-list" aria-live="polite">
+          <!-- leaderboard items inserted here -->
+        </ol>
+
+        <div style="margin-top:12px;" class="muted"><strong>How scores work:</strong> fewer guesses is better. Ties sorted by time.</div>
+      </aside>
+
+    </div>
+  </div>
+
+  <canvas id="confetti" aria-hidden="true"></canvas>
+
+<script>
+/* ============================
+   Vaporwave Guessing Game JS
+   - All in one file
+   - Leaderboard stored in localStorage
+   ============================ */
+
+(() => {
+  // DOM
+  const nameInput = document.getElementById('playerName');
+  const guessInput = document.getElementById('guessInput');
+  const guessBtn = document.getElementById('guessBtn');
+  const playAgainBtn = document.getElementById('playAgainBtn');
+  const hintEmoji = document.getElementById('hintEmoji');
+  const hintText = document.getElementById('hintText');
+  const guessCountEl = document.getElementById('guessCount');
+  const historyListEl = document.getElementById('historyList');
+  const leaderListEl = document.getElementById('leaderList');
+  const trendBadge = document.getElementById('trendBadge');
+
+  // state
+  let secret = randInt(1,100);
+  let guesses = 0;
+  let history = [];
+  let lastDiff = null;
+  const LS_KEY = 'vapor_guess_leaderboard_v1';
+
+  // confetti canvas
+  const canvas = document.getElementById('confetti');
+  const ctx = canvas.getContext('2d');
+  let confetti = [];
+  let confettiAnimating = false;
+  function resizeCanvas(){
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  // enable inputs when name entered
+  nameInput.addEventListener('input', () => {
+    const nm = nameInput.value.trim();
+    if (nm.length > 0) {
+      guessInput.disabled = false;
+      guessBtn.disabled = false;
+      hintEmoji.textContent = '✨';
+      hintText.innerHTML = `<span class="direction">Ready</span> <span class="proximity muted">Good luck, ${escapeHtml(nm)}!</span>`;
+    } else {
+      guessInput.disabled = true;
+      guessBtn.disabled = true;
+      hintEmoji.textContent = '🧭';
+      hintText.innerHTML = `<span class="direction">—</span> <span class="proximity muted">Enter your name to begin</span>`;
+    }
+  });
+
+  // main guess function
+  window.makeGuess = function() {
+    const nm = nameInput.value.trim();
+    if (!nm) { alert('Enter your name first.'); return; }
+
+    const val = Number(guessInput.value);
+    if (!val || val < 1 || val > 100) {
+      hintEmoji.textContent = '⚠️';
+      hintText.innerHTML = `<span class="direction">Invalid</span> <span class="proximity muted">Enter a number 1–100</span>`;
+      return;
+    }
+
+    guesses++;
+    history.push(val);
+    updateHistory();
+
+    const diff = Math.abs(val - secret);
+
+    // direction
+    let direction = (val === secret) ? '' : (val > secret ? 'Lower ⬇️' : 'Higher ⬆️');
+
+    // proximity categories (no hot/cold words)
+    let proximity = '';
+    if (diff === 0) {
+      proximity = `Correct! ${escapeHtml(nm)} guessed ${secret} in ${guesses} ${guesses===1?'guess':'guesses'}!`;
+      hintEmoji.textContent = '🎉';
+      hintText.innerHTML = `<span class="direction">${direction}</span> <span class="proximity">${proximity}</span>`;
+      // save score
+      saveScore(nm, guesses);
+      // finish round
+      guessInput.disabled = true;
+      guessBtn.disabled = true;
+      trendBadge.textContent = 'Trend: —';
+      launchConfetti();
+    } else {
+      // closeness messages
+      if (diff <= 3) proximity = 'Very close!';
+      else if (diff <= 10) proximity = 'Close!';
+      else if (diff <= 20) proximity = 'Getting warm';
+      else proximity = 'Far';
+
+      // trend: warmer / colder vs lastDiff
+      let trendText = 'Trend: —';
+      if (lastDiff !== null) {
+        if (diff < lastDiff) trendText = 'Trend: Getting warmer 🔥';
+        else if (diff > lastDiff) trendText = 'Trend: Getting colder ❄️';
+        else trendText = 'Trend: No change';
+      }
+      trendBadge.textContent = trendText;
+
+      // show combined hint
+      hintEmoji.textContent = diff <= 3 ? '🌟' : (diff <= 10 ? '✨' : '🧭');
+      hintText.innerHTML = `<span class="direction">${direction}</span> <span class="proximity">${proximity}</span>`;
+    }
+
+    lastDiff = diff;
+    guessCountEl.textContent = 'Guesses: ' + guesses;
+    guessInput.value = '';
+    guessInput.focus();
+    renderLeaderboard();
+  };
+
+  // update history UI
+  function updateHistory(){
+    if (history.length === 0) historyListEl.innerHTML = '—';
+    else historyListEl.innerHTML = history.map(x => `<span class="chip">${x}</span>`).join(' ');
+  }
+
+  // reset round (keeps name)
+  window.resetRound = function(){
+    secret = randInt(1,100);
+    guesses = 0;
+    history = [];
+    lastDiff = null;
+    guessCountEl.textContent = 'Guesses: 0';
+    historyListEl.innerHTML = '—';
+    trendBadge.textContent = 'Trend: —';
+    guessInput.disabled = nameInput.value.trim().length === 0;
+    guessBtn.disabled = nameInput.value.trim().length === 0;
+    hintEmoji.textContent = nameInput.value.trim() ? '✨' : '🧭';
+    hintText.innerHTML = nameInput.value.trim() ? `<span class="direction">Ready</span> <span class="proximity muted">Good luck, ${escapeHtml(nameInput.value.trim())}!</span>` : `<span class="direction">—</span> <span class="proximity muted">Enter your name to begin</span>`;
+    clearConfetti();
+  };
+
+  // clear input field
+  window.clearInput = function() {
+    guessInput.value = '';
+    guessInput.focus();
+  };
+
+  // ---------- Leaderboard (localStorage) ----------
+  function saveScore(name, guesses) {
+    const entry = { name: name, guesses: guesses, ts: new Date().toISOString() };
+    const arr = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+    arr.push(entry);
+    localStorage.setItem(LS_KEY, JSON.stringify(arr));
+    renderLeaderboard();
+  }
+
+  function renderLeaderboard() {
+    const arr = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+    if (!arr.length) {
+      leaderListEl.innerHTML = '<li class="lb-item"><div class="name">No scores yet</div></li>';
+      return;
+    }
+    // sort by guesses, then timestamp
+    arr.sort((a,b) => a.guesses - b.guesses || new Date(a.ts) - new Date(b.ts));
+    leaderListEl.innerHTML = arr.map((it, idx) => {
+      const ts = new Date(it.ts).toLocaleString();
+      return `<li class="lb-item">
+                <div>
+                  <div class="name">${escapeHtml(it.name)}</div>
+                  <div class="meta">${ts}</div>
+                </div>
+                <div style="text-align:right;">
+                  <div class="meta">Guesses</div>
+                  <div style="font-weight:900; font-size:1.05rem; color:var(--neon-pink)">${it.guesses}</div>
+                </div>
+              </li>`;
+    }).join('');
+  }
+
+  window.clearLeaderboard = function(){
+    if (!confirm('Clear the entire leaderboard? This cannot be undone.')) return;
+    localStorage.removeItem(LS_KEY);
+    renderLeaderboard();
+  };
+
+  // ---------- Confetti ----------
+  function launchConfetti(){
+    confetti = [];
+    for (let i=0;i<160;i++){
+      confetti.push({
+        x: Math.random()*canvas.width,
+        y: -Math.random()*canvas.height,
+        w: Math.random()*10+6,
+        h: Math.random()*6+4,
+        color: randomColor(),
+        speed: Math.random()*3 + 2,
+        rot: Math.random()*360
+      });
+    }
+    if (!confettiAnimating) animateConfetti();
+  }
+
+  function animateConfetti(){
+    confettiAnimating = true;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    for (let i=0;i<confetti.length;i++){
+      const p = confetti[i];
+      p.y += p.speed;
+      p.x += Math.sin(p.y/30)*2;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot * Math.PI / 180);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      ctx.restore();
+    }
+    confetti = confetti.filter(p => p.y < canvas.height + 50);
+    if (confetti.length > 0) requestAnimationFrame(animateConfetti);
+    else { confettiAnimating = false; ctx.clearRect(0,0,canvas.width,canvas.height); }
+  }
+
+  function clearConfetti(){ confetti = []; ctx.clearRect(0,0,canvas.width,canvas.height); confettiAnimating=false; }
+
+  function randomColor(){
+    const pal = ['#ff2fa8','#7ef9ff','#a56eff','#ffd166','#ff79c6','#7bed9f'];
+    return pal[Math.floor(Math.random()*pal.length)];
+  }
+
+  // utils
+  function randInt(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+  function escapeHtml(str){ return String(str).replace(/[&<>"']/g, function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]; }); }
+
+  // init render
+  renderLeaderboard();
+  resetRound();
+
+})();
+</script>
+
+</body>
+</html>

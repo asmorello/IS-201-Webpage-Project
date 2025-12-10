@@ -1,0 +1,67 @@
+/* Light blue background */
+body {
+  background-color: #e7f0ff;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* navbar */
+.simple-nav {
+  background: #d5e6ff;
+  padding: 12px;
+  display: flex;
+  gap: 20px;
+}
+
+.simple-nav a {
+  text-decoration: none;
+  color: #0b6efd;
+  font-weight: bold;
+}
+
+.simple-nav a.active {
+  text-decoration: underline;
+}
+
+
+.section-box {
+  background: white;
+  padding: 15px;
+  margin: 20px;
+  border-radius: 8px;
+}
+
+
+.scratch-image {
+  width: 100%;
+  max-width: 500px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+
+.title-text {
+  font-family: Georgia, serif;
+  color: #003366; 
+}
+
+
+.highlight-text {
+  font-family: "Courier New", monospace;
+  color: #8b0000; 
+  font-weight: bold;
+}
+
+
+.anchor-text {
+  font-family: Verdana, sans-serif;
+  color: green;
+}
+
+
+.body-text {
+  color: #333; 
+  font-family: Arial, sans-serif;
+}
+
